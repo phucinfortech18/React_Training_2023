@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email     String    @unique
+  username  String    @unique
+  password  String
+  bio       String    @default("")
+  image     String    @default("")
+  articles  Article[]
+  favorites Article[] @relation("UserFavorites")
+  followers Follow[]  @relation("Followers")
+  followees Follow[]  @relation("Followees")
+}
+
+model Article {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slug           String   @unique
+  title          String
+  description    String   @default("")
+  body           String   @default("")
+  tagList        String[]
+  favoritesCount Int      @default(0)
+  author         User     @relation(fields: [authorId], references: [id])
+  authorId       String
+  favoritedBy    User[]   @relation("UserFavorites")
+}
+
+model Follow {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  followerId String
+  followeeId String
+
+  followers User @relation("Followers", fields: [followerId], references: [id])
+  followees User @relation("Followees", fields: [followeeId], references: [id])
+}
